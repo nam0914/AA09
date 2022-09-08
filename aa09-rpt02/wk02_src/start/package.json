@@ -1,0 +1,15 @@
+{
+  "name": "wk02_src",
+  "version": "1.0.0",
+  "description": "start node project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node hello.js"
+  },
+  "keywords": [
+    "test"
+  ],
+  "author": "aa09",
+  "license": "MIT"
+}
