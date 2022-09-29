@@ -18,7 +18,7 @@
 
 <h3 align="center"> on Time: <span id="time"> </span> </h3> 
 
-<h3 align="center"> Signal (temp,lumi) : <span id="data"> </span> </h3> 
+<h3 align="center"> Signal (조도,습도,온도) : <span id="data"> </span> </h3> 
 
 <hr>
 
@@ -36,11 +36,11 @@
             console.log(msg[0]); // mdata[0] => dStr
             console.log(msg[1]); // mdata[1] => msg[1]
             console.log(msg[2]);
-            //console.log(msg[3]);
+            console.log(msg[3]);
             
             // Display signal on web browser           
             ctime.innerHTML = msg[0];
-            cdata.innerHTML = msg[1] + "," + msg[2]// + "," + msg[3];
+            cdata.innerHTML = msg[1] + "," + msg[2] + "," + msg[3];
         });
     });    
 
