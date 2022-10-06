@@ -1,0 +1,74 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<!-- Plotly.js -->
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+	<h1>Data visualization by AAnn</h1>
+	<hr>
+	<h2>Time series : PPG</h2>
+
+	<!-- Plotly chart will be drawn inside this DIV -->
+	<div id="myDiv" style="width: 900px;height: 600px"></div>
+	
+	<script>
+		// JAVASCRIPT CODE GOES HERE 
+
+		Plotly.d3.csv("http://chaos.inje.ac.kr:3030/data/ppg5k.csv", function(err, rows){
+
+			function unpack(rows, key) {
+				return rows.map(function(row) { return row[key]; });
+			}
+
+
+			var trace1 = {
+				type: "scatter",
+				mode: "lines",
+				name: 'PPG',
+				x: unpack(rows, 'Time'),
+				y: unpack(rows, 'PPG'),
+				line: {color: '#fc1234'}
+			}
+			
+			var data = [trace1];
+
+			var layout = {
+				title: 'PPG with rangeslider',
+				xaxis: {
+					autorange: true,
+					range: ['2015-07-24 12:43:00.7', '2015-07-24 12:47:12.3'],
+					rangeselector: {buttons: [
+						{
+							count: 1,
+							label: '1m',
+							step: 'minute',
+							stepmode: 'backward'
+						},
+						{
+							count: 2,
+							label: '2m',
+							step: 'minute',
+							stepmode: 'backward'
+						},
+						{step: 'all'}
+						]},
+						rangeslider: {range: ['2015-07-24 12:43:00.7', '2015-07-24 12:47:12.3']},
+						type: 'date'
+					},
+					yaxis: {
+						autorange: true,
+						range: [100, 800],
+						type: 'linear'
+					}
+				};
+
+
+				Plotly.newPlot('myDiv', data, layout);
+			})		
+
+		</script>
+
+	</body>
+</html>	
+

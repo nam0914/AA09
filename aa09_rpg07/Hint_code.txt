@@ -1,0 +1,60 @@
+// code hint 
+-------------
+
+// Line chart layout
+------------------------------------------------------
+		var layout = {
+			autosize: false,
+			width: 600,
+			height: 450,
+			margin: {
+				l: 50,  // left
+				r: 50,  // right
+				b: 100, // bottom 
+				t: 100, // top
+				pad: 4  // padding
+			},
+			paper_bgcolor: '#ececec',
+	  		plot_bgcolor: '#ffffff' //'#rrggbb'
+		};
+------------------------------------------------------
+
+
+// AAPL range slider
+------------------------------------------------------
+title: 'AAPL Price Time Series with range',
+				xaxis: {
+					range: ['2016-07-01', '2016-12-31'],
+					type: 'date'
+				},
+				yaxis: {
+					autorange: true,
+					range: [86.8700008333, 138.870004167],
+					type: 'linear'
+				}	
+------------------------------------------------------
+						
+
+// AAPL range slider
+------------------------------------------------------
+autorange: true,
+					range: ['2015-02-17', '2017-02-16'],
+					rangeselector: {buttons: [
+						{
+							count: 1,
+							label: '1m',
+							step: 'month',
+							stepmode: 'backward'
+						},
+						{
+							count: 6,
+							label: '6m',
+							step: 'month',
+							stepmode: 'backward'
+						},
+						{step: 'all'}
+						]},
+						rangeslider: {range: ['2015-02-17', '2017-02-16']},
+						type: 'date'
+------------------------------------------------------
+

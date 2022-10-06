@@ -1,0 +1,35 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<!-- Plotly.js -->
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+	<h1>Data visualization by AA09</h1>
+	<hr>
+	<h2>Hello plotly!</h2>
+	<!-- Plotly chart will be drawn inside this DIV -->
+	<div id="myDiv" style="width: 500px;height: 400px"></div>
+	<hr>
+	<script>
+		// JAVASCRIPT CODE GOES HERE 
+		var trace1 = 
+		{
+			x: [1, 2, 3, 4],
+			y: [10, 15, 13, 17],		
+			type: 'scatter'
+		};
+        var trace2 = 
+		{
+			x: [1, 2, 3, 4],
+			y: [16, 5, 11, 9],		
+			type: 'scatter'
+		};
+        var data=[trace1, trace2];
+
+		Plotly.newPlot('myDiv', data);	
+
+	</script>
+</body>
+</html>	
+
