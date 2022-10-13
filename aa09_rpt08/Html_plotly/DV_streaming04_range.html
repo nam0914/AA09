@@ -1,0 +1,52 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  </head>
+  <body>
+    <h2>Streaming using 30 points update </h2>
+
+    <div id="graph"></div>
+
+    <script>
+      var arrayLength = 30;
+      var newArray = [];
+      var timeArray = [];
+      // initial 30 data
+      for (var i = 0; i < arrayLength; i++) {
+        var y = Math.round(Math.random() * 10) + 1;
+        var time = new Date();
+        newArray[i] = y;
+        timeArray[i] = time;
+      }
+      var data = [
+        {
+          x:timeArray,
+          y: newArray,
+          mode: "lines+markers",
+          line: { color: "#80CAF6" },
+          marker:{color:"#FF0000"}
+        },
+      ];
+      Plotly.newPlot("graph", data);
+
+      var cnt = 0;
+      var interval = setInterval(function () {
+        var y = Math.round(Math.random() * 10) + 1;
+        var time = new Date();
+        timeArray = timeArray.concat(time);
+        timeArray.splice(0,1);
+        newArray = newArray.concat(y); // add new data
+        newArray.splice(0, 1); //remove the oldest data
+        var update = {
+          x: [timeArray],
+          y: [newArray],
+        };
+        Plotly.update("graph", update);
+        cnt++;
+        if (cnt === 50) clearInterval(interval);
+      }, 1000);
+    </script>
+  </body>
+</html>

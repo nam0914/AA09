@@ -1,0 +1,110 @@
+<!DOCTYPE html> 
+<head>  
+  <meta charset="utf-8">
+  <title>plotly.js client: Real time signals from sensors</title> 
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.1/socket.io.js"></script>
+  <style>body{padding:0;margin:30;background:#fff}</style>
+</head>
+
+<body>  <!-- style="width:100%;height:100%"> -->
+<!-- Plotly chart will be drawn inside this DIV -->
+<h1 align="center"> Real-time Luminosity(lux) from CdS sensor </h1>
+
+<h3 align="center"> on Time: <span id="time"> </span> </h3> 
+
+<div id="myDiv"></div> <!-- graph here! -->
+
+<hr>
+
+  <script>
+  /* JAVASCRIPT CODE GOES HERE */
+    var streamPlot = document.getElementById('myDiv');
+    var ctime = document.getElementById('time');
+    
+    var tArray = [], // time of data arrival
+        xTrack = [], // value of CdS sensor 1 : lux
+        numPts = 50, // number of data points                
+        dtda = [],  // 1 x 2 array : [date, lux] from CdS
+        preX = -1,  // check change in data
+        initFlag = true;
+
+    var socket = io.connect('http://localhost:3000'); // port = 3000  
+    socket.on('connect', function () {
+        socket.on('message', function (msg) {
+            // initial plot
+            if(msg[0]!='' && initFlag){
+                dtda[0]=msg[0];
+                dtda[1]=parseInt(msg[1]);  // lux
+                init();  // start streaming
+                initFlag=false;
+            }
+            console.log(msg[0]);
+            console.log(parseInt(msg[1])); // Convert value to integer
+            dtda[0]=msg[0];
+            dtda[1] = ; 
+
+            // when new data is coming, keep on streaming data           
+            ctime.innerHTML = ;
+            nextPt();                                
+        });
+    }); 
+
+    function init() {  // initial screen ()
+        // starting point : first data (lux)
+        for ( i = 0; i < numPts; i++) {
+            tArray.push(dtda[0]);  // date 
+            xTrack.push(dtda[1]);  // CdS sensor (lux)
+        }
+
+        Plotly.newPlot(streamPlot, data, layout);
+    }
+    
+    function nextPt() {
+
+        tArray.shift();
+        tArray.push(dtda[0]);
+        
+        xTrack.shift();
+        xTrack.push(dtda[1]);  // CdS sensor: lux
+
+        Plotly.redraw(streamPlot);  
+    } 
+
+    // data
+    var data = [{
+        x : tArray,
+        y : xTrack,
+        name : 'luminosity',
+        mode: "markers+lines",  
+        line: {
+            color: "#1f77b4", 
+            width: 1
+         }, 
+        marker: {
+            color: "rgb(255, 0, 0)", 
+            size: 6, 
+            line: {
+              color: "black", 
+              width: 0.5
+            }
+         }
+    }];
+
+    // layout
+    var layout = {
+        xaxis : {
+            title : 'time',
+            domain : 
+        },
+        yaxis : {
+            title : 'luminosity (lux)',
+            domain : 
+            range : 
+        }
+    };
+
+    // gauge configuration  
+  </script>
+</body>
+</html>

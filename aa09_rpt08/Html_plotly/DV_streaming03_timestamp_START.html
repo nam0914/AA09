@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  </head>
+  <body>
+    <h2> Timestamp data streaming </h2>
+    <div id="graph"></div>
+
+    <script>
+      function rand() {
+        return Math.random();
+      }
+
+      Plotly.newPlot("graph", data);
+
+      var cnt = 0;
+
+      var interval = setInterval(function () {
+        Plotly.extendTraces("graph", update, [0]);
+
+        if (cnt === 100) clearInterval(interval);
+      }, 1000);
+    </script>
+  </body>
+</html>

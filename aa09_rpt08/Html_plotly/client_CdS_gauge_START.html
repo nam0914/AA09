@@ -1,0 +1,153 @@
+<!DOCTYPE html> 
+<head>  
+  <meta charset="utf-8">
+  <title>plotly.js client: Real time signals from sensors</title> 
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.1/socket.io.js"></script>
+
+  <script src="gauge.min.js"></script>
+
+  <style>body{padding:0;margin:30;background:#fff}</style>
+</head>
+
+<body>  <!-- style="width:100%;height:100%"> -->
+<!-- Plotly chart will be drawn inside this DIV -->
+<h1 align="center"> Real-time Luminosity(lux) from CdS sensor with Gauge</h1>
+<!-- Lux gauge -->
+<div align="center">
+    
+</div>
+
+<h3 align="center"> on Time: <span id="time"> </span> </h3> 
+
+<div id="myDiv"></div> <!-- graph here! -->
+
+<hr>
+
+  <script>
+  /* JAVASCRIPT CODE GOES HERE */
+    var streamPlot = document.getElementById('myDiv');
+    var ctime = document.getElementById('time');
+    
+    var tArray = [], // time of data arrival
+        xTrack = [], // value of CdS sensor 1 : lux
+        numPts = 50, // number of data points                
+        dtda = [],  // 1 x 2 array : [date, lux] from CdS
+        preX = -1,  // check change in data
+        initFlag = true;
+
+    var socket = io.connect('http://localhost:3000'); // port = 3000  
+    socket.on('connect', function () {
+        socket.on('message', function (msg) {
+            // initial plot
+            if(msg[0]!='' && initFlag){
+                dtda[0]=msg[0];
+                dtda[1]=parseInt(msg[1]);  // lux
+                init();  // start streaming
+                initFlag=false;
+            }
+            console.log(msg[0]);
+            console.log(parseInt(msg[1])); // Convert value to integer
+            dtda[0]=msg[0];
+            dtda[1] = parseInt(msg[1]); 
+
+            // when new data is coming, keep on streaming data           
+            ctime.innerHTML = dtda[0];
+                 // Add lux gauge
+
+            //nextPt();                                
+            tArray = tArray.concat(dtda[0]);  // time
+            tArray.splice(0,1);
+            xTrack = xTrack.concat(dtda[1]);  // lux
+            xTrack.splice(0,1);
+
+            var update = {
+                x: [tArray],
+                y: [xTrack]
+            }
+
+            Plotly.update(streamPlot, update);
+
+        });
+    }); 
+
+    function init() {  // initial screen ()
+        // starting point : first data (lux)
+        for ( i = 0; i < numPts; i++) {
+            tArray.push(dtda[0]);  // date 
+            xTrack.push(dtda[1]);  // CdS sensor (lux)
+        }
+
+        Plotly.newPlot(streamPlot, data, layout);
+    }
+    
+    // data
+    var data = [{
+        x : tArray,
+        y : xTrack,
+        name : 'luminosity',
+        mode: "markers+lines",  
+        line: {
+            color: "#1f77b4", 
+            width: 1
+         }, 
+        marker: {
+            color: "rgb(255, 0, 0)", 
+            size: 6, 
+            line: {
+              color: "black", 
+              width: 0.5
+            }
+         }
+    }];
+
+    // layout
+    var layout = {
+        xaxis : {
+            title : 'time',
+            domain : [0, 1]
+        },
+        yaxis : {
+            title : 'luminosity (lux)',
+            domain : [0, 1],
+            range : [0, 500]
+        }
+    };
+
+    // gauge configuration  
+    var gauge_lux = new Gauge({
+        renderTo    : '',
+        width       : 300,
+        height      : 300,
+        glow        : true,
+        units       : '',
+        valueFormat : { int : , dec :  },
+        title       : "Luminosity",
+        minValue    : 0,
+        maxValue    : ,  // new
+        majorTicks  : ['0','100','200','300','400','500'],
+        minorTicks  : 10,
+        strokeTicks : false,
+        highlights  : [
+            { from : 0,   to : 100, color : '#aaa' },
+            { from : 100, to : 200, color : '#ccc' },
+            { from : 200, to : 300, color : '#ddd' },
+            { from : 300, to : 400, color : '#eee' },
+            { from : 400, to : 500, color : '#fff' }
+        ],
+        colors      : {
+            plate      : '#1f77b4',
+            majorTicks : '#f5f5f5',
+            minorTicks : '#aaa',
+            title      : '#fff',
+            units      : '#ccc',
+            numbers    : '#eee',
+            needle     : { start : 'rgba(240, 128, 128, 1)', end : 'rgba(255, 160, 122, .9)' }
+        }
+    });
+
+    //gauge_lux.draw();
+
+  </script>
+</body>
+</html>
