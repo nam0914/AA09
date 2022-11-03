@@ -1,0 +1,24 @@
+{
+  "name": "cds_dht22",
+  "version": "1.0.0",
+  "description": "cds-dht22-node project",
+  "main": "cds_dht22_node.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cds",
+    "dht22",
+    "node",
+    "arduino"
+  ],
+  "author": "aa00",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "mongoose": "^6.7.1",
+    "serialport": "^9.2.4",
+    "socket.io": "^2.4.1"
+  }
+}
