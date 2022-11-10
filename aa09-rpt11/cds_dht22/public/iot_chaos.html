@@ -1,0 +1,98 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<!-- Plotly.js -->
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+	<h1>Data visualization by AAnn</h1>
+	<hr>
+	<h2>Time series by AAnn</h2>
+
+	<!-- Plotly chart will be drawn inside this DIV -->
+	<div id="myDiv" style="width: 700px;height: 500px"></div>
+	
+	<script>
+		// JAVASCRIPT CODE GOES HERE
+
+		Plotly.d3.csv("http://life21c.inje.ac.kr:3030/data/iot_chaos.csv", function(err, rows){
+
+			function unpack(rows, key) {
+				return rows.map(function(row) { return row[key]; });
+			}
+
+
+			var trace1 = {
+				type: "scatter",
+				mode: "lines",
+				name: 'Temp',
+				x: unpack(rows, 'date'),
+				y: unpack(rows, 'temperature'),
+				line: {color: '#FF7F7F'}
+			}
+
+			var trace2 = {
+				type: "scatter",
+				mode: "lines",
+				name: 'Humi',
+				x: unpack(rows, 'date'),
+				y: unpack(rows, 'humidity'),
+				line: {color: '#17BECF'}
+			}
+
+			var trace3 = {
+				type: "scatter",
+				mode: "lines",
+				name: 'Lumi',
+				x: unpack(rows, 'date'),
+				y: unpack(rows, 'luminosity'),
+				line: {color: '#7F7F7F'}
+			}
+			
+			var data = [trace1,trace2,trace3];
+
+			var layout = {
+				title: 'IOT data with rangeslider',
+				xaxis: {
+					autorange: true,
+					range: ['2018-11-14  9:02:47', '2018-11-26  5:50:19'],
+					rangeselector: {buttons: [
+						{
+							count: 1,
+							label: '1day',
+							step: 'day',
+							stepmode: 'backward'
+						},
+						{
+							count: 7,
+							label: '1week',
+							step: 'day',
+							stepmode: 'backward'
+						},
+						{
+							count: 1,
+							label: '1month',
+							step: 'month',
+							stepmode: 'backward'
+						},
+						{step: 'all'}
+						]},
+						rangeslider: {range: ['2018-11-14  9:02:47', '2018-11-26  5:50:19']},
+						type: 'date'
+					},
+					yaxis: {
+						autorange: true,
+						range: [86.8700008333, 138.870004167],
+						type: 'linear'
+					}
+				};
+
+
+				Plotly.newPlot('myDiv', data, layout);
+			})		
+
+		</script>
+
+	</body>
+</html>	
+
