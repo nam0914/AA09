@@ -1,0 +1,466 @@
+<!DOCTYPE html> 
+<head>  
+  <meta charset="utf-8">
+  <title>plotly.js Project: Real time signals from nano 33 ble sensor</title> 
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.1/socket.io.js"></script>  
+
+  <script src="gauge.min.js"></script>
+
+  <style>body{padding:0;margin:30;background:#fff}</style>
+</head>
+
+<body>  <!-- style="width:100%;height:100%"> -->
+    <!-- Plotly chart will be drawn inside this DIV -->
+    <h1 align="center"> Real-time IMU from nano 33 BLE sensor </h1>
+    <!-- 1st gauge -->
+    <div align="center">
+        <canvas id="gauge1"> </canvas>  
+        <!-- 2nd gauge -->
+        <canvas id="gauge2"> </canvas>
+        <!-- 3rd gauge -->
+        <canvas id="gauge3"> </canvas>
+    </div>
+    <!-- <div id="console"> </div> -->
+    <h3 align="center"> on Time: <span id="time"> </span> </h3> 
+    <div id="myDiv_a" height="25%"></div>  
+    <div id="myDiv_g" height="25%"></div>
+    <div id="myDiv_m" height="25%"></div>
+    <hr>
+
+    <script>
+      /* JAVASCRIPT CODE GOES HERE */
+	  // function to calculate root-mean-square value of a vector
+      function rms(x, y, z) {
+         var m = Math.sqrt(x*x + y*y +z*z);
+         return m.toFixed(2);
+      }
+
+      var streamPlot_a = document.getElementById('myDiv_a');
+      var streamPlot_g = document.getElementById('myDiv_g');
+      var streamPlot_m = document.getElementById('myDiv_m');
+      streamPlot_a.style.height = "320px";
+      streamPlot_g.style.height = "320px";
+      streamPlot_m.style.height = "320px";
+
+      var ctime = document.getElementById('time');
+
+      var tArray = [], // time of data arrival
+        a1Track = [], // value of sensor 1 : ax
+        a2Track = [], // value of sensor 2 : ay
+        a3Track = [], // value of sensor 3 : az
+        g1Track = [], // value of sensor 4 : gx
+        g2Track = [], // value of sensor 5 : gy
+        g3Track = [], // value of sensor 6 : gz
+        m1Track = [], // value of sensor 1 : mx
+        m2Track = [], // value of sensor 2 : my
+        m3Track = [], // value of sensor 3 : mz
+
+        numPts = 60, // number of data points in x-axis                
+        dtda = [],  // 
+        preA = -1,
+        preG = -1,
+        preM = -1,
+        initFlag = true;
+
+    var socket = io.connect('http://localhost:3000'); // port = 3000  
+    socket.on('connect', function () {
+        socket.on('message', function (msg) {
+            // initial plot
+            if(msg[0]!='' && initFlag){
+                dtda[0]=msg[0];
+                for(i=1;i<=9;i++){
+                    dtda[i] = parseFloat(msg[i]); // all float numbers
+                }
+                init();
+                initFlag=false;
+            }
+              
+            // Convert value to numbers
+            dtda[0]=msg[0];
+            for(i=1;i<=9;i++){
+                dtda[i] = parseFloat(msg[i]); 
+            }
+
+            // Only when any of ax, gx, mx is different from the previous one, the screen is redrawed.
+            if (dtda[1] != preA || dtda[4] != preG || dtda[7] != preM) {  // any change?
+                preA = dtda[1];  // ax
+                preG = dtda[4];  // gx
+                preM = dtda[7];  // mx
+                                                
+                // when new data is coming, keep on streaming            
+                ctime.innerHTML = dtda[0];
+                // Set gauges
+                
+
+                tArray = tArray.concat(dtda[0]);
+                tArray.splice(0, 1);  // remove the oldest data
+                a1Track = a1Track.concat(dtda[1]);
+                a1Track.splice(0, 1); // remove the oldest data
+                a2Track = a2Track.concat(dtda[2]);
+                a2Track.splice(0, 1);            
+                a3Track = a3Track.concat(dtda[3]); 
+                a3Track.splice(0, 1);
+
+                g1Track = g1Track.concat(dtda[4]);
+                g1Track.splice(0, 1); // remove the oldest data
+                g2Track = g2Track.concat(dtda[5]);
+                g2Track.splice(0, 1);            
+                g3Track = g3Track.concat(dtda[6]); 
+                g3Track.splice(0, 1);
+
+                m1Track = m1Track.concat(dtda[7]);
+                m1Track.splice(0, 1); // remove the oldest data
+                m2Track = m2Track.concat(dtda[8]);
+                m2Track.splice(0, 1);            
+                m3Track = m3Track.concat(dtda[9]); 
+                m3Track.splice(0, 1);
+
+                var update_a = {
+                    x:  [tArray, tArray, tArray],
+                    y:  [a1Track, a2Track, a3Track]
+                }
+                var update_g = {
+                    x:  [tArray, tArray, tArray],
+                    y:  [g1Track, g2Track, g3Track]
+                }
+                var update_m = {
+                    x:  [tArray, tArray, tArray],
+                    y:  [m1Track, m2Track, m3Track]
+                }
+
+                Plotly.update(streamPlot_a, update_a);
+                Plotly.update(streamPlot_g, update_g);
+                Plotly.update(streamPlot_m, update_m);
+            }
+
+      });
+    }); 
+
+    function init() {  // initial screen ()
+        // starting point : first data (temp, lux)
+        for ( i = 0; i < numPts; i++) {
+            tArray.push(dtda[0]);  // date 
+            a1Track.push(dtda[1]);  // ax
+            a2Track.push(dtda[2]);  // ay
+            a3Track.push(dtda[3]);  // az
+            g1Track.push(dtda[4]);  // gx
+            g2Track.push(dtda[5]);  // gy
+            g3Track.push(dtda[6]);  // gz
+            m1Track.push(dtda[7]);  // mx
+            m2Track.push(dtda[8]);  // my
+            m3Track.push(dtda[9]);  // mz
+            
+        }
+
+        Plotly.plot(streamPlot_a, data_a, layout_a);
+        Plotly.plot(streamPlot_g, data_g, layout_g);
+        Plotly.plot(streamPlot_m, data_m, layout_m);
+    }
+    
+    // data
+    var data_a = [{
+        x : tArray,
+        y : a1Track,
+        name : 'accel_x',
+        mode: "markers+lines",  // "lines+markers"
+        line: {
+            color: "#1f77b4", 
+            width: 1
+        }, 
+        marker: {
+            color: "rgb(255, 0, 0)", 
+            size: 6, 
+            line: {
+              color: "black", 
+              width: 0.5
+          }
+      }
+  }, {
+    x : tArray,
+    y : a2Track,
+    name : 'accel_y',
+        mode: "markers+lines",  // "lines+markers"
+        line: {
+            color: "#1f77b4", 
+            width: 1
+        }, 
+        marker: {
+            color: "rgb(0, 0, 255)", 
+            size: 6, 
+            line: {
+              color: "black", 
+              width: 0.5
+          }
+      }
+  }, {
+    x : tArray,
+    y : a3Track,
+    name : 'accel_z',
+        mode: "markers+lines",  // "lines+markers"
+        line: {
+            color: "#1f77b4", 
+            width: 1
+        }, 
+        marker: {
+            color: "rgb(0, 255, 0)", 
+            size: 6, 
+            line: {
+              color: "black", 
+              width: 0.5
+          }
+      }
+  }];
+
+  var layout_a = {
+    xaxis : {
+        title : 'time',
+        domain : [0, 1]
+    },
+    yaxis : {
+        title : 'ACC',
+        domain : [0, 1],
+        range : [-4, 4]
+    }
+};
+
+var data_g = [{
+        x : tArray,
+        y : g1Track,
+        name : 'gyro_x',
+        mode: "markers+lines",  // "lines+markers"
+        line: {
+            color: "#1f77b4", 
+            width: 1
+        }, 
+        marker: {
+            color: "rgb(255, 0, 0)", 
+            size: 6, 
+            line: {
+              color: "black", 
+              width: 0.5
+          }
+      }
+  }, {
+    x : tArray,
+    y : g2Track,
+    name : 'gyro_y',
+        mode: "markers+lines",  // "lines+markers"
+        line: {
+            color: "#1f77b4", 
+            width: 1
+        }, 
+        marker: {
+            color: "rgb(0, 0, 255)", 
+            size: 6, 
+            line: {
+              color: "black", 
+              width: 0.5
+          }
+      }
+  }, {
+    x : tArray,
+    y : g3Track,
+    name : 'gyro_z',
+        mode: "markers+lines",  // "lines+markers"
+        line: {
+            color: "#1f77b4", 
+            width: 1
+        }, 
+        marker: {
+            color: "rgb(0, 255, 0)", 
+            size: 6, 
+            line: {
+              color: "black", 
+              width: 0.5
+          }
+      }
+  }];
+
+  var layout_g = {
+    xaxis : {
+        title : 'time',
+        domain : [0, 1]
+    },
+    yaxis : {
+        title : 'GYRO',
+        domain : [0, 1], //[0.35, 0.65],
+        range : [-2000, 2000]
+    }
+};  
+
+var data_m = [{
+        x : tArray,
+        y : m1Track,
+        name : 'mag_x',
+        mode: "markers+lines",  // "lines+markers"
+        line: {
+            color: "#1f77b4", 
+            width: 1
+        }, 
+        marker: {
+            color: "rgb(255, 0, 0)", 
+            size: 6, 
+            line: {
+              color: "black", 
+              width: 0.5
+          }
+      }
+  }, {
+    x : tArray,
+    y : g2Track,
+    name : 'mag_y',
+        mode: "markers+lines",  // "lines+markers"
+        line: {
+            color: "#1f77b4", 
+            width: 1
+        }, 
+        marker: {
+            color: "rgb(0, 0, 255)", 
+            size: 6, 
+            line: {
+              color: "black", 
+              width: 0.5
+          }
+      }
+  }, {
+    x : tArray,
+    y : g3Track,
+    name : 'mag_z',
+        mode: "markers+lines",  // "lines+markers"
+        line: {
+            color: "#1f77b4", 
+            width: 1
+        }, 
+        marker: {
+            color: "rgb(0, 255, 0)", 
+            size: 6, 
+            line: {
+              color: "black", 
+              width: 0.5
+          }
+      }
+  }];
+
+  var layout_m = {
+    xaxis : {
+        title : 'time',
+        domain : [0, 1]
+    },
+    yaxis : {
+        title : 'MAG',
+        domain : [0, 1], //[0.7, 1],
+        range : [-400, 400]
+    }
+};
+
+    // gauge configuration
+    // 가속도 평균 크기 표시
+    var gauge_acc = new Gauge({
+        renderTo    : 'gauge1',
+        width       : 240,
+        height      : 240,
+        glow        : true,
+        units       : '°C',
+        valueFormat : { int : 2, dec : 1 },
+        title       : "Acceleration",
+        minValue    : -30,
+        maxValue    : 50,
+        majorTicks  : ['-30','-20','-10','0','10','20','30','40','50'],
+        minorTicks  : 10,
+        strokeTicks : false,
+        highlights  : [
+        { from : -30,   to : -20, color : 'rgba(0, 0, 255, 1)' },
+        { from : -20,   to : -10, color : 'rgba(0, 0, 255, .5)' },
+        { from : -10, to : 0, color : 'rgba(0, 0, 255, .25)' },
+        { from : 0,   to : 10, color : 'rgba(0, 255, 0, .1)' },
+        { from : 10, to : 20, color : 'rgba(0, 255, 0, .25)' },
+        { from : 20, to : 30, color : 'rgba(255, 0,  0, .25)' },
+        { from : 30, to : 40, color : 'rgba(255, 0,  0, .5)' },
+        { from : 40, to : 50, color : 'rgba(255, 0,  0, 1)' }
+        ],
+        colors      : {
+            plate      : '#fff',
+            majorTicks : '#000',
+            minorTicks : '#444',
+            title      : '#000',
+            units      : '#f00',
+            numbers    : '#777',
+            needle     : { start : 'rgba(240, 128, 128, 1)', end : 'rgba(255, 160, 122, .9)' }
+        }
+    });
+
+    gauge_acc.draw();
+
+    // 자이로 평균 각도 표시
+    var gauge_gyro = new Gauge({
+        renderTo    : 'gauge2',
+        width       : 240,
+        height      : 240,
+        glow        : true,
+        units       : '%',
+        valueFormat : { int : 2, dec : 1 },
+        title       : "Gyroscope",
+        minValue    : 0,
+        maxValue    : 100,
+        majorTicks  : ['0','20','40','60','80','100'],
+        minorTicks  : 10,
+        strokeTicks : false,
+        highlights  : [        
+        { from : 0, to : 20, color : '#aaa' },
+        { from : 20, to : 40, color : '#ccc' },
+        { from : 40, to : 60, color : '#ddd' },
+        { from : 60, to : 80, color : '#eee' },
+        { from : 80, to : 100, color : '#fff' }
+        ],
+        colors      : {
+            plate      : '#1f77b4',
+            majorTicks : '#f5f5f5',
+            minorTicks : '#aaa',
+            title      : '#fff',
+            units      : '#ccc',
+            numbers    : '#eee',
+            needle     : { start : 'rgba(240, 128, 128, 1)', end : 'rgba(255, 160, 122, .9)' }
+        }
+    });
+
+    gauge_gyro.draw();
+
+    // 지자기 평균 크기 표시
+    var gauge_mag = new Gauge({
+        renderTo    : 'gauge3',
+        width       : 240,
+        height      : 240,
+        glow        : true,
+        units       : 'lux',
+        valueFormat : { int : 2, dec : 0 },
+        title       : "Magnetic Field",
+        minValue    : 0,
+        maxValue    : 1000,  // new
+        majorTicks  : ['0','200','400','600','800','1000'],
+        minorTicks  : 100,
+        strokeTicks : false,
+        highlights  : [
+        { from : 0,   to : 200, color : '#aaa' },
+        { from : 200, to : 400, color : '#ccc' },
+        { from : 400, to : 600, color : '#ddd' },
+        { from : 600, to : 800, color : '#eee' },
+        { from : 800, to : 1000, color : '#fff' }
+        ],
+        colors      : {
+            plate      : '#555',
+            majorTicks : '#f5f5f5',
+            minorTicks : '#aaa',
+            title      : '#fff',
+            units      : '#ccc',
+            numbers    : '#eee',
+            needle     : { start : 'rgba(240, 128, 128, 1)', end : 'rgba(255, 160, 122, .9)' }
+        }
+    });
+
+    gauge_mag.draw();
+
+   
+</script>
+</body>
+</html>
